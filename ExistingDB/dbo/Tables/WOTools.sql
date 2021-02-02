@@ -2,7 +2,7 @@
     [WOToolID]          INT           IDENTITY (1, 1) NOT NULL,
     [Dept_Id]           CHAR (4)      NOT NULL,
     [WONO]              CHAR (10)     NOT NULL,
-    [Description]       CHAR (100)    NOT NULL,
+    [Description]       NVARCHAR(100)    NOT NULL,
     [UniqueNumber]      CHAR (10)     NOT NULL,
     [TemplateId]        INT           NOT NULL,
     [WOToolPriority]    INT           NOT NULL,
