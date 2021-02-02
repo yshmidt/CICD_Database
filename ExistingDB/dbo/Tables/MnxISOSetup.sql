@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[MnxISOSetup] (
+    [ISOServerId]  INT           IDENTITY (1, 1) NOT NULL,
+    [ISOServerAPI] VARCHAR (MAX) NULL,
+    [CreatedDate]  DATETIME      NULL,
+    CONSTRAINT [PK__MnxISOSe__FDEA318FA4507830] PRIMARY KEY CLUSTERED ([ISOServerId] ASC)
+);
+

@@ -1,0 +1,12 @@
+﻿CREATE TABLE [dbo].[ImportBOMToKitLot] (
+    [LotId]        UNIQUEIDENTIFIER NOT NULL,
+    [FKAvlRowId]   UNIQUEIDENTIFIER NOT NULL,
+    [LotRowId]     UNIQUEIDENTIFIER NOT NULL,
+    [FKFieldDefId] UNIQUEIDENTIFIER NOT NULL,
+    [Original]     NVARCHAR (MAX)   NULL,
+    [Adjusted]     NVARCHAR (MAX)   NULL,
+    [Status]       NVARCHAR (50)    NULL,
+    [Message]      NVARCHAR (MAX)   NOT NULL,
+    CONSTRAINT [PK__ImportBO__4160EFAD6210FA5F] PRIMARY KEY CLUSTERED ([LotId] ASC)
+);
+

@@ -1,0 +1,3 @@
+﻿CREATE TYPE [dbo].[UniqueKeys] AS TABLE (
+    [UNIQKEY] NVARCHAR (20) NULL);
+

@@ -1,0 +1,116 @@
+﻿CREATE TABLE [dbo].[PLPRICES] (
+    [PACKLISTNO] CHAR (10)       CONSTRAINT [DF__PLPRICES__PACKLI__6680FC4D] DEFAULT ('') NOT NULL,
+    [UNIQUELN]   CHAR (10)       CONSTRAINT [DF__PLPRICES__UNIQUE__67752086] DEFAULT ('') NOT NULL,
+    [DESCRIPT]   CHAR (45)       CONSTRAINT [DF__PLPRICES__DESCRI__686944BF] DEFAULT ('') NOT NULL,
+    [QUANTITY]   NUMERIC (10, 2) CONSTRAINT [DF__PLPRICES__QUANTI__695D68F8] DEFAULT ((0)) NOT NULL,
+    [PRICE]      NUMERIC (14, 5) CONSTRAINT [DF__PLPRICES__PRICE__6A518D31] DEFAULT ((0)) NOT NULL,
+    [EXTENDED]   NUMERIC (20, 2) CONSTRAINT [DF__PLPRICES__EXTEND__6B45B16A] DEFAULT ((0)) NOT NULL,
+    [TAXABLE]    BIT             CONSTRAINT [DF__PLPRICES__TAXABL__6C39D5A3] DEFAULT ((0)) NOT NULL,
+    [FLAT]       BIT             CONSTRAINT [DF__PLPRICES__FLAT__6D2DF9DC] DEFAULT ((0)) NOT NULL,
+    [INV_LINK]   CHAR (10)       CONSTRAINT [DF__PLPRICES__INV_LI__6E221E15] DEFAULT ('') NOT NULL,
+    [RECORDTYPE] CHAR (1)        CONSTRAINT [DF__PLPRICES__RECORD__6F16424E] DEFAULT ('') NOT NULL,
+    [AMORTFLAG]  CHAR (1)        CONSTRAINT [DF__PLPRICES__AMORTF__700A6687] DEFAULT ('') NOT NULL,
+    [PL_GL_NBR]  CHAR (13)       CONSTRAINT [DF__PLPRICES__PL_GL___70FE8AC0] DEFAULT ('') NOT NULL,
+    [PLPRICELNK] CHAR (10)       CONSTRAINT [DF__PLPRICES__PLPRIC__71F2AEF9] DEFAULT ('') NOT NULL,
+    [PLUNIQLNK]  CHAR (10)       CONSTRAINT [DF__PLPRICES__PLUNIQ__72E6D332] DEFAULT ([dbo].[fn_GenerateUniqueNumber]()) NOT NULL,
+    [COG_GL_NBR] CHAR (13)       CONSTRAINT [DF__PLPRICES__COG_GL__73DAF76B] DEFAULT ('') NOT NULL,
+    [PRICEFC]    NUMERIC (14, 5) CONSTRAINT [DF__PLPRICES__PRICEF__601FAE2F] DEFAULT ((0)) NOT NULL,
+    [EXTENDEDFC] NUMERIC (20, 2) CONSTRAINT [DF__PLPRICES__EXTEND__6113D268] DEFAULT ((0)) NOT NULL,
+    [PRICEPR]    NUMERIC (14, 5) CONSTRAINT [DF__PLPRICES__PRICEP__147FFE83] DEFAULT ((0)) NOT NULL,
+    [EXTENDEDPR] NUMERIC (20, 2) CONSTRAINT [DF__PLPRICES__EXTEND__157422BC] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [PLPRICES_PK] PRIMARY KEY CLUSTERED ([PLUNIQLNK] ASC)
+);
+
+
+GO
+CREATE NONCLUSTERED INDEX [AMORT]
+    ON [dbo].[PLPRICES]([INV_LINK] ASC, [RECORDTYPE] ASC, [AMORTFLAG] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [INV_LINK]
+    ON [dbo].[PLPRICES]([INV_LINK] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [PACKLISTNO]
+    ON [dbo].[PLPRICES]([PACKLISTNO] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [PKLNPRLNK]
+    ON [dbo].[PLPRICES]([PACKLISTNO] ASC, [UNIQUELN] ASC, [PLPRICELNK] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [PKNO_UNIQ]
+    ON [dbo].[PLPRICES]([PACKLISTNO] ASC, [UNIQUELN] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [PLPRICELNK]
+    ON [dbo].[PLPRICES]([PLPRICELNK] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [UNIQUELN]
+    ON [dbo].[PLPRICES]([UNIQUELN] ASC);
+
+
+GO
+-- =============================================
+-- Author:		Vicky Lu
+-- Create date: <09/17/10>
+-- Description:	<trigger for plprices to update invoice total>
+-- =============================================
+CREATE TRIGGER [dbo].[Plprices_Insert_Update_Delete]
+   ON  [dbo].[PLPRICES]
+   AFTER INSERT,DELETE,UPDATE
+AS 
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	
+	BEGIN TRANSACTION
+	DECLARE @lcPacklistno char(10);
+	SELECT @lcPacklistno = Packlistno FROM Inserted
+	IF @@ROWCOUNT = 0
+		BEGIN
+		SELECT @lcPacklistno = Packlistno FROM Deleted
+		IF @@ROWCOUNT <> 0
+			EXEC sp_Invoice_Total @lcPacklistno;
+		END
+	ELSE
+		BEGIN	
+			EXEC sp_Invoice_Total @lcPacklistno;
+		END
+	
+	COMMIT
+END
+
+
+
+
+GO
+-- =============================================
+-- Author:		Vicky Lu
+-- Create date: <04/30/14>
+-- Description:	<trigger for plprices to delete invstdtx>
+-- =============================================
+CREATE TRIGGER [dbo].[Plprices_Delete]
+   ON  [dbo].[PLPRICES]
+   AFTER DELETE
+AS 
+
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	DECLARE @lcPacklistno char(10), @lcPluniqlnk char(10)
+	
+	SELECT @lcPacklistno = Packlistno, @lcPluniqlnk = PlUniqlnk FROM deleted
+			
+    DELETE FROM INVSTDTX WHERE PACKLISTNO = @lcPacklistno AND PLUNIQLNK = @lcPluniqlnk AND Invoiceno = ''
+
+END

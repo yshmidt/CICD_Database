@@ -1,0 +1,7 @@
+﻿CREATE VIEW [dbo].[rptRightsNonSupView]
+AS
+SELECT     TOP (100) PERCENT USERID, NAME, FIRSTNAME
+FROM         dbo.USERS
+WHERE     (SUPERVISOR <> 'True') AND (LASS <> 'True')
+ORDER BY NAME
+

@@ -1,0 +1,284 @@
+﻿-- =============================================
+-- Author:		Yelena
+-- Create date: 01/12/2015
+-- Description:	This Stored Procedure was created for the Inventory Transaction History with Balance and will replace rptInvtTransHistwBal
+-- original Report:  icrpt4.rpt
+--01/20/15 YS added conversion from purchase to stock UOM
+--03/12/15 YS replace invtmfhd table with Invtmpnlink and mfgrmaster (nned to update ...2012WM procedure after 2014 server is installed
+-- 08/24/15 DRP/YS:  added the sort order at the end for Quickview. Changed RunningTotal to be RunningBalOh, in order to have the QuickView not think it is a $ value
+--					 Had to make sure to change the serialno to be cast('' as char(30)) as serialno instead of '' as serialno within the Po Receipt, Po Reject and DMR Return sections.  it was causing issues with the reporting
+--					 In the DMR Return section had to change <<CASE WHEN pi.poittype = 'In Store' then 1 else 0 END>> to <<0 as instore>> because once ISP Po is created the stock is no longer considered Instore. 
+--					 also needed to add <<and pi.POITTYPE <> 'In Store'>> in the Po Receipt section of code.
+---  02/03/17 remove this SP no more 2008 sql support
+-- =============================================
+CREATE PROCEDURE [dbo].[rptInvtTransHistwBal2008WM]
+-- changing parameters to work on the  web
+		@lcUniq_key char(10),
+		@lcType as char (20) = 'Internal',  --where the user would specify Internal, Internal & In Store, In Store, Consigned
+		@lcCustNo as varchar(max) = 'All',
+		@lcDateStart as smalldatetime= null,
+		@userId uniqueidentifier = null
+	
+AS
+BEGIN
+SET NOCOUNT ON;
+
+ --   -- Insert statements for procedure here
+	--SELECT @lcDateStart=CASE WHEN @lcDateStart is null then @lcDateStart else DATEADD(day,-1,cast(@lcDateStart as smalldatetime))  END			
+	
+	----get list of customers for @userid with access
+	--if (@lcType='Consigned') 	
+	--BEGIN	
+	--	DECLARE  @tCustomer as tCustomer
+	--	DECLARE @Customer TABLE (custno char(10))
+	--	INSERT INTO @tCustomer (Custno,CustName) EXEC aspmnxSP_GetCustomers4User @userid ;
+	--	IF @lcCustNo is not null and @lcCustNo <>'' and @lcCustNo<>'All'
+	--		insert into @Customer select * from dbo.[fn_simpleVarcharlistToTable](@lcCustNo,',')
+	--				where CAST (id as CHAR(10)) in (select CustNo from @tCustomer)
+	--	ELSE
+	--	BEGIN
+	--		IF  @lcCustNo='All'	
+	--		BEGIN
+	--			INSERT INTO @Customer SELECT CustNo FROM @tCustomer
+	--		END -- IF  @lcCustNo='All'	
+	--	END -- IF @lcCustNo is not null and @lcCustNo <>'' and @lcCustNo<>'All'
+	--	;with PartInfo
+	--		as
+	--		(
+			
+	--		select Uniq_key,part_class,Part_type,custpartno as Part_no,custrev as revision,[descript],part_sourc,Inventor.custno 
+	--				from Inventor INNER JOIN @Customer C ON Inventor.custno=C.Custno
+	--				where part_sourc='CONSG' and uniq_key = @lcUniq_key
+	--		),
+	--		Mfhd
+	--		as
+	--		(
+	--		--03/12/15 YS replace invtmfhd table with 2 new tables
+	--		--select Uniq_key,uniqmfgrhd, partmfgr,mfgr_pt_no,matltype
+	--		--from Invtmfhd where exists (select 1 from partinfo where partinfo.uniq_key=invtmfhd.uniq_key)
+	--		select L.Uniq_key,L.uniqmfgrhd, M.partmfgr,M.mfgr_pt_no,M.matltype
+	--		from Invtmpnlink L inner join mfgrmaster M on l.mfgrmasterid=m.mfgrmasterid where exists (select 1 from partinfo where partinfo.uniq_key=l.uniq_key)
+	--		),
+	--		WhLoc
+	--		as
+	--		(
+	--		select Uniq_key,uniqmfgrhd, w_key,w.whno,w.uniqwh,location,instore,w.warehouse,  
+	--			SUM(qty_oh) OVER (partition by uniq_key) as CurrentBalance
+	--		from Invtmfgr L INNER JOIN Warehous W on l.uniqwh=w.uniqwh 
+	--			where exists (select 1 from partinfo where partinfo.uniq_key=l.uniq_key)
+	--		),
+	--		-- use nsort to position transactions with types like receipts and in house movememnts before issue or DMR, 'from' before 'to', when date is the same
+	--		AllTransactions
+	--		as(
+	--		select CAST('Receiving' as varchar(25)) as transType,Ir.Uniq_key,space(10) as fromwkey,ir.w_key as towkey, 
+	--		mfhd.partmfgr,mfhd.mfgr_pt_no,ir.uniqmfgrhd,whloc.Uniqwh,whloc.whno,whloc.location,whloc.warehouse,whloc.instore,
+	--		IR.[Date],IR.Qtyrec as TransQty,IR.LotCode,IR.Expdate,IR.Reference,SAVEINIT,
+	--		TRANSREF,COMMREC as reason,serialno,Mfhd.MatlTYpe,cast(' ' as varchar(25)) as woPoRef,space(10) as uniqrecdtl,1 as nsort
+	--		 from Invt_rec IR left outer join mfhd on ir.uniqmfgrhd=mfhd.uniqmfgrhd
+	--		 left outer join whloc on ir.w_key=whloc.w_key
+	--		 where [date] > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=ir.uniq_key) 
+	--		 UNION ALL
+	--		 SELECT case when qtyisu<0 then 'Issue Return' else 'Issue' end as transType, ISS.Uniq_key,Iss.W_KEY as fromwkey,space(10) as towkey,
+	--		mfhd.partmfgr,mfhd.mfgr_pt_no,iss.uniqmfgrhd,whloc.Uniqwh,whloc.whno,whloc.location,whloc.warehouse,whloc.instore,
+	--		 Iss.[Date],-QTYISU as TransQty,Iss.LOTCODE,Iss.EXPDATE,Iss.REFERENCE,Iss.SAVEINIT,
+	--			Iss.TRANSREF,ISSUEDTO as reason,serialno,Mfhd.MatlTYpe,cast(iss.wono as varchar(25)) as woPoRef,space(10) as uniqrecdtl,
+	--			5 as nsort					
+	--			FROM INVT_ISU iss left outer join Mfhd on iss.uniqmfgrhd=mfhd.uniqmfgrhd
+	--			LEFT OUTER JOIN WhLoc on iss.w_key=whloc.w_key
+	--			WHERE  --(@lcRptType='All' or @lcRptType='Issues') AND
+	--			iss.[date] > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=iss.uniq_key)
+	--		UNION ALL
+	--		SELECT 'Transfer From',tra.UNIQ_KEY, FROMWKEY ,TOWKEY,
+	--		mfhd.partmfgr,mfhd.mfgr_pt_no,tra.uniqmfgrhd,fromwh.Uniqwh,fromwh.whno,fromwh.location,fromwh.warehouse,fromwh.instore,
+	--		[date],-QTYXFER TransQty,LOTCODE,EXPDATE,REFERENCE,SAVEINIT,
+	--		TRANSREF,REASON,serialno,Mfhd.MatlTYpe,cast(tra.wono as varchar(25)) as woPoRef,space(10) as uniqrecdtl,3 as nsort				
+	--			FROM INVTTRNS tra left outer join Mfhd on tra.uniqmfgrhd=mfhd.uniqmfgrhd
+	--			left outer join whloc fromwh on tra.fromwkey=fromwh.w_key
+	--		WHERE 
+	--		tra.[date] > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=tra.uniq_key) 
+	--		UNION ALL
+	--		SELECT 'Transfer To',tra.UNIQ_KEY, FROMWKEY ,TOWKEY,
+	--		mfhd.partmfgr,mfhd.mfgr_pt_no,tra.uniqmfgrhd,towh.Uniqwh,towh.whno,towh.location,towh.warehouse,towh.instore,
+	--		[date],QTYXFER TransQty,LOTCODE,EXPDATE,REFERENCE,SAVEINIT,
+	--		TRANSREF,REASON,serialno,Mfhd.MatlTYpe,cast(tra.wono as varchar(25)) as woPoRef,space(10) as uniqrecdtl	,4 as nsort			
+	--			FROM INVTTRNS tra left outer join Mfhd on tra.uniqmfgrhd=mfhd.uniqmfgrhd
+	--			left outer join whloc towh on tra.towkey=towh.w_key
+	--		WHERE tra.[date] >@lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=tra.uniq_key) 
+	--		)
+	--		,ResultPrep as 
+	--		(
+	--		select 	A.*,ROW_NUMBER() OVER (ORDER BY  uniq_key,date,nsort) as nsequence  
+	--			from AllTransactions a
+	--		),
+	--		FinalWithBalance AS
+	--		(SELECT ResultPrep.*, cast(TransQty as numeric(18,2)) as RunningBalOh
+	--			FROM ResultPrep
+	--		WHERE nsequence = '1'
+	--		UNION ALL
+	--		SELECT y.*, cast(x.RunningBalOh + y.TransQty as numeric(18,2))
+	--		FROM FinalWithBalance x INNER JOIN ResultPrep AS y
+	--			ON y.[nsequence] = x.[nsequence]+1)
+			
+	--		select p.Part_no,p.Revision,p.part_class,p.Part_type,p.Descript,p.Part_sourc,p.custno,
+	--			C.CustName,A.* ,q.CurrentBalance
+	--			from FinalWithBalance a inner join partinfo P on A.uniq_key=P.Uniq_key 
+	--			inner join Customer C on p.custno=C.Custno
+	--			OUTER APPLY (select distinct uniq_key,CurrentBalance from WhLoc where whloc.UNIQ_KEY=p.UNIQ_KEY) Q
+	--			order by part_no,revision,date,nsort
+	--			OPTION (MAXRECURSION 0)
+	--END --- if (@lcType='Consigned')
+	--ELSE   -- @lcType='Consigned')
+	--BEGIN
+	--	-- internal parts
+	--	;with PartInfo
+	--		as
+	--		(
+	--		--12/23/14 YS added part-class selection
+	--		select Uniq_key,part_class,Part_type,Part_no,revision,[descript],part_sourc 
+	--			from Inventor where uniq_key = @lcUniq_key 
+			
+	--		),
+	--		Mfhd
+	--		as
+	--		(
+	--		--03/12/15 YS replace invtmfhd table with 2 new tables
+	--		--select Uniq_key,uniqmfgrhd, partmfgr,mfgr_pt_no,matltype
+	--		--from Invtmfhd where exists (select 1 from partinfo where partinfo.uniq_key=invtmfhd.uniq_key)
+	--		select L.Uniq_key,L.uniqmfgrhd, M.partmfgr,M.mfgr_pt_no,M.matltype
+	--		from Invtmpnlink L inner join mfgrmaster M on l.mfgrmasterid=m.mfgrmasterid where exists (select 1 from partinfo where partinfo.uniq_key=l.uniq_key)
+	--		),
+	--		WhLoc
+	--		as
+	--		(
+	--		-- try limit based on @lcTYpe did not help, will remove from simplicity
+	--		select Uniq_key,uniqmfgrhd, w_key,w.whno,w.uniqwh,location,instore,w.warehouse,qty_oh from Invtmfgr L INNER JOIN Warehous W on l.uniqwh=w.uniqwh 
+	--			where exists (select 1 from partinfo where partinfo.uniq_key=l.uniq_key)
+		
+		
+	--		),
+	--		-- use nsort to position transactions with types like receipts and in house movememnts before issue or DMR, 'from' before 'to', when date is the same
+	--		AllTransactions
+	--		as(
+	--		select CAST('Receiving' as varchar(25)) as transType,Ir.Uniq_key,space(10) as fromwkey,ir.w_key as towkey, 
+	--		mfhd.partmfgr,mfhd.mfgr_pt_no,ir.uniqmfgrhd,whloc.Uniqwh,whloc.whno,whloc.location,whloc.warehouse,whloc.instore,
+	--		IR.[Date],IR.Qtyrec as TransQty,IR.LotCode,IR.Expdate,IR.Reference,SAVEINIT,
+	--		TRANSREF,COMMREC as reason,serialno,Mfhd.MatlTYpe,cast(' ' as varchar(25)) as woPoRef,space(10) as uniqrecdtl,1 as nsort
+	--		 from Invt_rec IR left outer join Mfhd on ir.uniqmfgrhd=mfhd.uniqmfgrhd
+	--		 left outer join whloc on ir.w_key=whloc.w_key
+	--		 where date > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=ir.uniq_key) 
+	--		 UNION ALL
+	--		 SELECT case when qtyisu<0 then 'Issue Return' else 'Issue' end as transType, ISS.Uniq_key,Iss.W_KEY as fromwkey,space(10) as towkey,
+	--		mfhd.partmfgr,mfhd.mfgr_pt_no,iss.uniqmfgrhd,whloc.Uniqwh,whloc.whno,whloc.location,whloc.warehouse,whloc.instore,
+	--		 Iss.[Date],-QTYISU as TransQty,Iss.LOTCODE,Iss.EXPDATE,Iss.REFERENCE,Iss.SAVEINIT,
+	--			Iss.TRANSREF,ISSUEDTO as reason,serialno,Mfhd.MatlTYpe,cast(iss.wono as varchar(25)) as woPoRef,space(10) as uniqrecdtl,
+	--			5 as nsort	
+	--			FROM INVT_ISU iss left outer join Mfhd on iss.uniqmfgrhd=mfhd.uniqmfgrhd
+	--			LEFT OUTER JOIN WhLoc on iss.w_key=whloc.w_key
+	--			WHERE iss.date > @lcDateStart   and exists (select 1 from partinfo where partinfo.uniq_key=iss.uniq_key)
+	--		UNION ALL
+	--		SELECT 'Transfer From',tra.UNIQ_KEY, FROMWKEY ,TOWKEY,
+	--		mfhd.partmfgr,mfhd.mfgr_pt_no,tra.uniqmfgrhd,fromwh.Uniqwh,fromwh.whno,fromwh.location,fromwh.warehouse,fromwh.instore,
+	--		[date],-QTYXFER TransQty,LOTCODE,EXPDATE,REFERENCE,SAVEINIT,
+	--		-- 12/23/14 YS added GL_NBR_INV for 'from' transfer and gl_nbt for 'to' transfer transactions as woPoRef
+	--		TRANSREF,REASON,serialno,Mfhd.MatlTYpe,cast('G/L:' +tra.GL_NBR_INV as varchar(25)) as woPoRef,space(10) as uniqrecdtl,3 as nsort				
+	--			FROM INVTTRNS tra left outer join Mfhd on tra.uniqmfgrhd=mfhd.uniqmfgrhd
+	--			left outer join whloc fromwh on tra.fromwkey=fromwh.w_key
+	--		WHERE tra.date > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=tra.uniq_key) 
+	--		UNION ALL
+	--		SELECT 'Transfer To',tra.UNIQ_KEY, FROMWKEY ,TOWKEY,
+	--		mfhd.partmfgr,mfhd.mfgr_pt_no,tra.uniqmfgrhd,towh.Uniqwh,towh.whno,towh.location,towh.warehouse,towh.instore,
+	--		[date],QTYXFER TransQty,LOTCODE,EXPDATE,REFERENCE,SAVEINIT,
+	--		-- 12/23/14 YS added GL_NBR_INV for 'from' transfer and gl_nbt for 'to' transfer transactions as woPoRef
+	--		TRANSREF,REASON,serialno,Mfhd.MatlTYpe,cast('G/L:' +tra.GL_NBR as varchar(25)) as woPoRef,space(10) as uniqrecdtl	,4 as nsort			
+	--			FROM INVTTRNS tra left outer join Mfhd on tra.uniqmfgrhd=mfhd.uniqmfgrhd
+	--			left outer join whloc towh on tra.towkey=towh.w_key
+	--		WHERE tra.date > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=tra.uniq_key) 
+	--		UNION ALL
+	--		-- added limit based on @lcType
+	--		--01/20/15 YS added conversion from purchase to stock UOM
+	--		select 'PO Receipt',PI.Uniq_key, space(10) as fromwkey,space(10) as towkey,
+	--		pr.partmfgr,pr.mfgr_pt_no,pr.uniqmfgrhd,w.Uniqwh,w.whno,pl.location,w.warehouse,case when pi.poittype='In Store' then 1 else 0 END,
+	--		pr.recvDate as [date],	
+	--		case when pi.Pur_uofm=pi.U_of_meas THEN isnull(lt.lotqty,pl.accptqty) 
+	--				ELSE dbo.fn_ConverQtyUOM(pi.Pur_uofm, pi.U_of_meas,isnull(lt.lotqty,pl.accptqty)) END as transqty,
+	--		isnull(lt.lotcode,space(15)) as lotcode,
+	--		EXPDATE,isnull(REFERENCE,space(12)) as reference,
+	--		RECINIT as SAVEINIT,'' as TRANSREF,'' as reason,
+	--		cast('' as char(30)) as serialno	,Mfhd.MatlTYpe,pi.ponum as woPoRef,pr.uniqrecdtl,1 as nsort			
+	--			from porecdtl PR inner join poitems pi on pr.uniqlnno=pi.uniqlnno
+	--			inner join porecloc PL on pr.uniqrecdtl=pl.fk_uniqrecdtl
+	--			left outer join Warehous w on pl.uniqwh=w.uniqwh
+	--			left outer join mfhd on pr.uniqmfgrhd=mfhd.uniqmfgrhd and pr.partmfgr=mfhd.partmfgr and pr.mfgr_pt_no=mfhd.mfgr_pt_no
+	--			left outer join poreclot lt on pl.loc_uniq=lt.loc_uniq 
+	--			where pr.recvDate > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=pi.uniq_key) 
+	--			--12/23/14 YS remove records with 0 accepted qty
+	--			AND pl.accptqty<>0.00
+	--			AND ((@lcType='Internal & In Store') OR (@lcType='In Store' and pi.poittype='In Store') OR (@lcType='Internal' and pi.poittype='Invt Part'))
+	--			and pi.POITTYPE <> 'In Store'	--08/24/15 DRP:  Added
+	--		UNION ALL
+	--		select 'PO Reject',PI.Uniq_key, space(10) as fromwkey,space(10) as towkey,
+	--		pr.partmfgr,pr.mfgr_pt_no,pr.uniqmfgrhd,w.Uniqwh,w.whno,'PO:'+PI.PONUM as location,'MRB',CASE WHEN pi.poittype = 'In Store' then 1 else 0 END,
+	--		pr.recvDate as [date],	
+	--		case when pi.Pur_uofm=pi.U_of_meas THEN isnull(lt.rejlotqty,pl.rejqty) ELSE
+	--		dbo.fn_ConverQtyUOM(pi.Pur_uofm, pi.U_of_meas,isnull(lt.rejlotqty,pl.rejqty)) END as transqty,
+	--		isnull(lt.lotcode,space(15)) as lotcode,
+	--		EXPDATE,isnull(REFERENCE,space(12)) as reference,
+	--		RECINIT as SAVEINIT,'' as TRANSREF,'' as reason,
+	--		cast('' as char(30)) as serialno,mfhd.matlType,pi.ponum as woPoRef,pr.uniqrecdtl,2 as nsort					
+	--			from porecdtl PR inner join poitems pi on pr.uniqlnno=pi.uniqlnno
+	--			inner join porecloc PL on pr.uniqrecdtl=pl.fk_uniqrecdtl
+	--			OUTER APPLY (SELECT warehouse,uniqwh,whno from Warehous where warehouse='MRB') w
+	--			left outer join poreclot lt on pl.loc_uniq=lt.loc_uniq 
+	--			left outer join mfhd on pr.uniqmfgrhd=mfhd.uniqmfgrhd and pr.partmfgr=mfhd.partmfgr and pr.mfgr_pt_no=mfhd.mfgr_pt_no
+	--			where pr.recvDate > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=pi.uniq_key) and pl.rejqty<>0.00 
+	--			--AND ((@lcType='Internal & In Store') OR (@lcType='In Store' and pi.poittype='In Store') OR (@lcType='Internal' and pi.poittype='Invt Part'))
+	--		UNION ALL
+	--		select 'DMR Return',PI.Uniq_key, space(10) as fromwkey,space(10) as towkey,
+	--		pr.partmfgr,pr.mfgr_pt_no,pr.uniqmfgrhd,w.Uniqwh,w.whno,'PO:'+PI.PONUM as location,'MRB'
+	--		,0 as instore,	--,CASE WHEN pi.poittype = 'In Store' then 1 else 0 END,	--08/24/15 DRP:
+	--		MRB.RMA_DATE as [date],	
+	--		case when pi.Pur_uofm=pi.U_of_meas THEN -MRB.RET_QTY ELSE
+	--		- dbo.fn_ConverQtyUOM(pi.Pur_uofm, pi.U_of_meas,MRB.RET_QTY) END as transqty,
+	--		space(15) as lotcode,
+	--		NULL as EXPDATE,space(12) as reference,
+	--		MRB.Initial as SAVEINIT,'' as TRANSREF,'' as reason,
+	--		--12/23/14 YS show DMR_NO in woPoRef
+	--		cast('' as char(30)) as serialno,mfhd.matlType,'DMR: '+mrb.dmr_no as woPoRef,pr.uniqrecdtl	,5 as nsort			
+	--			from porecdtl PR inner join poitems pi on pr.uniqlnno=pi.uniqlnno
+	--			inner join PORECMRB MRB on pr.uniqrecdtl=mrb.fk_uniqrecdtl
+	--			OUTER APPLY (SELECT warehouse,uniqwh,whno from Warehous where warehouse='MRB') w
+	--			left outer join mfhd on pr.uniqmfgrhd=mfhd.uniqmfgrhd and pr.partmfgr=mfhd.partmfgr and pr.mfgr_pt_no=mfhd.mfgr_pt_no
+	--			where MRB.RMA_DATE > @lcDateStart and exists (select 1 from partinfo where partinfo.uniq_key=pi.uniq_key) 
+	--			--AND ((@lcType='Internal & In Store') OR (@lcType='In Store' and pi.poittype='In Store') OR (@lcType='Internal' and pi.poittype='Invt Part'))
+
+	--		)
+	--		--- CTE if sql<2012
+	--		,ResultPrep as 
+	--		(
+	--		select 	A.*,ROW_NUMBER() OVER (ORDER BY  uniq_key,date,nsort) as nsequence  
+	--			from AllTransactions a
+	--			where ((@lcType='Internal & In Store') OR (@lcType='In Store' and a.instore=1) OR (@lcType='Internal' and a.instore=0))
+	--		),
+	--		FinalWithBalance AS
+	--		(SELECT ResultPrep.*, cast(TransQty as numeric(18,2)) as RunningBalOh
+	--			FROM ResultPrep
+	--		WHERE nsequence = '1'
+	--		UNION ALL
+	--		SELECT y.*, cast(x.RunningBalOh + y.TransQty as numeric(18,2))
+	--		FROM FinalWithBalance x INNER JOIN ResultPrep AS y
+	--			ON y.[nsequence] = x.[nsequence]+1
+	--		)
+	--		select p.Part_no,p.Revision,p.part_class,p.Part_type,p.Descript,p.Part_sourc,' ' as custno, ' ' as custname,
+	--		A.*,q.CurrentBalance
+	--		from FinalWithBalance  a inner join partinfo P on A.uniq_key=P.Uniq_key
+	--		OUTER APPLY (SELECT uniq_key,sum(qty_oh) as CurrentBalance 
+	--						from WhLoc 
+	--							where whloc.uniq_key=p.uniq_key  
+	--							and ((@lcType='Internal & In Store') OR (@lcType='In Store' and a.instore=1) OR (@lcType='Internal' and a.instore=0))
+	--							group by whloc.uniq_key ) Q
+	--		order by part_no,revision,date,nsort 
+	--		OPTION (MAXRECURSION 0)
+			
+		
+	--END   --- else --- if (@lcType='Consigned')		
+END

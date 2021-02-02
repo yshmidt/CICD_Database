@@ -1,0 +1,8 @@
+﻿CREATE PROCEDURE [dbo].[sp_UnLockPoFlag]
+AS
+BEGIN
+	UPDATE PODEFLTS 
+		SET lInSave = 0,
+			LINSAVEINFO =' ' ,
+			lInSaveDt =NULL
+END

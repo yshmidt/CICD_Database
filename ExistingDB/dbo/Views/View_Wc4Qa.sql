@@ -1,0 +1,7 @@
+﻿
+CREATE VIEW [dbo].[View_Wc4Qa]
+AS
+SELECT     dbo.QAINSP.DEPT_ID, dbo.DEPTS.DEPT_NAME, dbo.DEPTS.NUMBER, dbo.WOENTRY.CUSTNO
+FROM         dbo.QAINSP INNER JOIN
+                      dbo.DEPTS ON dbo.QAINSP.DEPT_ID = dbo.DEPTS.DEPT_ID INNER JOIN
+                      dbo.WOENTRY ON dbo.QAINSP.WONO = dbo.WOENTRY.WONO

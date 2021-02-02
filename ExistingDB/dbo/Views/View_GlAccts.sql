@@ -1,0 +1,12 @@
+﻿
+-- 12/09/16 VL added presentatio currency fields
+CREATE VIEW [dbo].[View_GlAccts]
+AS
+SELECT     dbo.GL_ACCT.GL_NBR, dbo.GL_ACCT.FK_FYDTLUNIQ, dbo.GLFISCALYRS.FISCALYR, dbo.GLFYRSDETL.PERIOD, dbo.GL_ACCT.BEG_BAL, dbo.GL_ACCT.DEBIT, 
+                      dbo.GL_ACCT.CREDIT, dbo.GL_ACCT.END_BAL, dbo.GL_ACCT.GL_NBR + dbo.GLFISCALYRS.FISCALYR + dbo.PADL(LTRIM(CONVERT(char(2), 
+                      dbo.GLFYRSDETL.PERIOD)), 2, '0') AS NBR_PERIOD, 
+ROW_NUMBER() OVER(PARTITION BY GL_nbr ORDER BY FISCALYR,Period )  as SequenceNumber, 
+dbo.GL_ACCT.Uniquerec, dbo.GL_ACCT.BEG_BALPR, dbo.GL_ACCT.DEBITPR, dbo.GL_ACCT.CREDITPR, dbo.GL_ACCT.END_BALPR
+FROM         dbo.GL_ACCT INNER JOIN
+                      dbo.GLFYRSDETL ON dbo.GL_ACCT.FK_FYDTLUNIQ = dbo.GLFYRSDETL.FYDTLUNIQ INNER JOIN
+                      dbo.GLFISCALYRS ON dbo.GLFYRSDETL.FK_FY_UNIQ = dbo.GLFISCALYRS.FY_UNIQ

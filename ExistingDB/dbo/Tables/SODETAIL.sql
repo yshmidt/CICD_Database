@@ -1,0 +1,125 @@
+﻿CREATE TABLE [dbo].[SODETAIL] (
+    [SONO]       CHAR (10)       CONSTRAINT [DF__SODETAIL__SONO__4FA883ED] DEFAULT ('') NOT NULL,
+    [UNIQUELN]   CHAR (10)       CONSTRAINT [DF__SODETAIL__UNIQUE__509CA826] DEFAULT ('') NOT NULL,
+    [LINE_NO]    CHAR (7)        CONSTRAINT [DF__SODETAIL__LINE_N__5190CC5F] DEFAULT ('') NOT NULL,
+    [UNIQ_KEY]   CHAR (10)       CONSTRAINT [DF__SODETAIL__UNIQ_K__5284F098] DEFAULT ('') NOT NULL,
+    [UOFMEAS]    CHAR (4)        CONSTRAINT [DF__SODETAIL__UOFMEA__537914D1] DEFAULT ('') NOT NULL,
+    [EACHQTY]    NUMERIC (9, 2)  CONSTRAINT [DF__SODETAIL__EACHQT__546D390A] DEFAULT ((0)) NOT NULL,
+    [ORD_QTY]    NUMERIC (9, 2)  CONSTRAINT [DF__SODETAIL__ORD_QT__55615D43] DEFAULT ((0)) NOT NULL,
+    [SHIPPEDQTY] NUMERIC (9, 2)  CONSTRAINT [DF__SODETAIL__SHIPPE__5655817C] DEFAULT ((0)) NOT NULL,
+    [BALANCE]    NUMERIC (9, 2)  CONSTRAINT [DF__SODETAIL__BALANC__5749A5B5] DEFAULT ((0)) NOT NULL,
+    [Sodet_Desc] CHAR (45)       CONSTRAINT [DF__SODETAIL__DESC__583DC9EE] DEFAULT ('') NOT NULL,
+    [TRANS_DAYS] NUMERIC (3)     CONSTRAINT [DF__SODETAIL__TRANS___5931EE27] DEFAULT ((0)) NOT NULL,
+    [FSTDUEDT]   SMALLDATETIME   NULL,
+    [DELIFREQ]   CHAR (2)        CONSTRAINT [DF__SODETAIL__DELIFR__5A261260] DEFAULT ('') NOT NULL,
+    [CATEGORY]   CHAR (10)       CONSTRAINT [DF__SODETAIL__CATEGO__5B1A3699] DEFAULT ('') NOT NULL,
+    [NOTE]       TEXT            CONSTRAINT [DF__SODETAIL__NOTE__5C0E5AD2] DEFAULT ('') NOT NULL,
+    [EXTENDED]   NUMERIC (16, 2) CONSTRAINT [DF__SODETAIL__EXTEND__5D027F0B] DEFAULT ((0)) NOT NULL,
+    [BULLETIN]   TEXT            CONSTRAINT [DF__SODETAIL__BULLET__5DF6A344] DEFAULT ('') NOT NULL,
+    [WONOFLAG]   BIT             CONSTRAINT [DF__SODETAIL__WONOFL__5EEAC77D] DEFAULT ((0)) NOT NULL,
+    [QTYFROMINV] NUMERIC (9, 2)  CONSTRAINT [DF__SODETAIL__QTYFRO__5FDEEBB6] DEFAULT ((0)) NOT NULL,
+    [STATUS]     CHAR (10)       CONSTRAINT [DF__SODETAIL__STATUS__60D30FEF] DEFAULT ('') NOT NULL,
+    [W_KEY]      CHAR (10)       CONSTRAINT [DF__SODETAIL__W_KEY__61C73428] DEFAULT ('') NOT NULL,
+    [ORIGINUQLN] CHAR (10)       CONSTRAINT [DF__SODETAIL__ORIGIN__62BB5861] DEFAULT ('') NOT NULL,
+    [PRJUNIQUE]  CHAR (10)       CONSTRAINT [DF__SODETAIL__PRJUNI__63AF7C9A] DEFAULT ('') NOT NULL,
+    [ARCSTATUS]  CHAR (10)       CONSTRAINT [DF__SODETAIL__ARCSTA__64A3A0D3] DEFAULT ('') NOT NULL,
+    [PRODTPUNIQ] CHAR (10)       CONSTRAINT [DF__SODETAIL__PRODTP__6597C50C] DEFAULT ('') NOT NULL,
+    [PRODTPUKLN] CHAR (10)       CONSTRAINT [DF__SODETAIL__PRODTP__668BE945] DEFAULT ('') NOT NULL,
+    [CNFGQTYPER] NUMERIC (9, 2)  CONSTRAINT [DF__SODETAIL__CNFGQT__67800D7E] DEFAULT ((0)) NOT NULL,
+    [MRPONHOLD]  BIT             CONSTRAINT [DF__SODETAIL__MRPONH__687431B7] DEFAULT ((0)) NOT NULL,
+    [SOURCEINSP] BIT             CONSTRAINT [DF__SODETAIL__SOURCE__696855F0] DEFAULT ((0)) NOT NULL,
+    [FIRSTARTCL] BIT             CONSTRAINT [DF__SODETAIL__FIRSTA__6A5C7A29] DEFAULT ((0)) NOT NULL,
+    [LFCSTITEM]  BIT             CONSTRAINT [DF__SODETAIL__LFCSTI__6B509E62] DEFAULT ((0)) NOT NULL,
+    [LWARRANTY]  BIT             CONSTRAINT [DF__SODETAIL__LWARRA__6C44C29B] DEFAULT ((0)) NOT NULL,
+    [SLinkAdd]   CHAR (10)       DEFAULT ('') NOT NULL,
+    [FOB]        CHAR (15)       DEFAULT ('') NOT NULL,
+    [Shipvia]    CHAR (20)       DEFAULT ('') NOT NULL,
+    [BillAcount] CHAR (20)       DEFAULT ('') NOT NULL,
+    [Deliv_Time] CHAR (8)        DEFAULT ('') NOT NULL,
+    [Attention]  CHAR (10)       DEFAULT ('') NOT NULL,
+    [ExtendedFC] NUMERIC (16, 2) CONSTRAINT [DF__SODETAIL__Extend__3FB2DE9D] DEFAULT ((0)) NOT NULL,
+    [ShipCharge] CHAR (15)       CONSTRAINT [DF__SODETAIL__ShipCh__55A21FBC] DEFAULT ('') NOT NULL,
+    [EXTENDEDPR] NUMERIC (16, 2) CONSTRAINT [DF__SODETAIL__EXTEND__6B7DE8F0] DEFAULT ((0.00)) NOT NULL,
+    [inLastMrp]  BIT             CONSTRAINT [DF_SODETAIL_inLastMrp] DEFAULT ((0)) NOT NULL,
+    [isSFBL]     BIT             CONSTRAINT [DF_SODETAIL_isSFBL] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [SODETAIL_PK] PRIMARY KEY CLUSTERED ([UNIQUELN] ASC)
+);
+
+
+GO
+CREATE NONCLUSTERED INDEX [LINE_NO]
+    ON [dbo].[SODETAIL]([LINE_NO] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [PRJUNIQUE]
+    ON [dbo].[SODETAIL]([PRJUNIQUE] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [SoDetBalStat]
+    ON [dbo].[SODETAIL]([BALANCE] ASC, [STATUS] ASC)
+    INCLUDE([SONO], [UNIQUELN], [LINE_NO], [UNIQ_KEY], [ORD_QTY], [SHIPPEDQTY], [Sodet_Desc]);
+
+
+GO
+CREATE NONCLUSTERED INDEX [SONO]
+    ON [dbo].[SODETAIL]([SONO] ASC, [UNIQUELN] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [SONOUNIQKY]
+    ON [dbo].[SODETAIL]([SONO] ASC, [UNIQ_KEY] ASC);
+
+
+GO
+-- =============================================
+-- Author:		Yelena Shmidt
+-- Create date: 03/26/2015
+-- Description:	Run after Sodetail  is inserted
+-- 06/10/15 YS added '' around 0 in line_no='0'
+-- =============================================
+CREATE TRIGGER [dbo].[Sodetail_INSERT]
+   ON  [dbo].[SODETAIL]
+   AFTER INSERT
+AS 
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	-- 06/10/15 YS added '' around 0 in line_no='0'
+	BEGIN TRANSACTION 
+	UPDATE Sodetail SET LINE_NO = case when line_no='' or line_no='0' then '0000001' else dbo.padl(RTRIM(LTRIM(Line_no)) ,7,'0') end 
+			where EXISTS (select 1 from Inserted where Inserted.UNIQUELN=Sodetail.UNIQUELN)
+
+	COMMIT
+
+END
+GO
+-- =============================================
+-- Author:		Vicky Lu
+-- Create date: 12/10/2009
+-- Description:	Run after Sodetail record is deleted, will remove associated records in Soprices and Due_dts
+-- 01/06/15 YS change removing record from woentry to removing the link to a sales order
+-- 09/27/16 VL Added to delete SopricesTax
+-- =============================================
+CREATE TRIGGER [dbo].[Sodetail_Delete]
+   ON  [dbo].[SODETAIL]
+   AFTER DELETE
+AS 
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION 
+	-- 09/27/16 VL added to delete SopricesTax
+	DELETE FROM SopricesTax WHERE Uniqueln IN (SELECT Uniqueln FROM DELETED)
+	DELETE FROM Soprices WHERE Uniqueln IN (SELECT Uniqueln FROM DELETED)
+	DELETE FROM Due_dts WHERE Uniqueln IN (SELECT Uniqueln FROM DELETED)
+	-- 01/06/15 YS change removing record from woentry to removing the link to a sales order
+	--DELETE FROM Woentry WHERE Uniqueln IN (SELECT Uniqueln FROM DELETED)
+	 UPDATE Woentry set uniqueln='' ,sono=''  WHERE EXISTS (SELECT Uniqueln FROM DELETED where deleted.uniqueln=woentry.uniqueln)
+	COMMIT
+
+END

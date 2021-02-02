@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[WmUserNote] (
+    [WmUserNoteId] UNIQUEIDENTIFIER NOT NULL,
+    [UserId]       UNIQUEIDENTIFIER NOT NULL,
+    [NoteId]       UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK_WmUserNote] PRIMARY KEY CLUSTERED ([WmUserNoteId] ASC)
+);
+

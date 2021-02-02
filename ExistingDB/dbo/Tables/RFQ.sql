@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[RFQ] (
+    [RFQId]            BIGINT           IDENTITY (1, 1) NOT NULL,
+    [RFQNo]            NVARCHAR (50)    NULL,
+    [RFQStatus]        NVARCHAR (50)    NULL,
+    [RFQType]          NVARCHAR (50)    NULL,
+    [custRFQ]          NVARCHAR (50)    NULL,
+    [CUSTNO]           CHAR (10)        NULL,
+    [ContactId]        BIGINT           NULL,
+    [StartedBy]        NVARCHAR (50)    NULL,
+    [StartDate]        SMALLDATETIME    NULL,
+    [DueDate]          SMALLDATETIME    NULL,
+    [CompleteDate]     SMALLDATETIME    NULL,
+    [UserId]           UNIQUEIDENTIFIER NULL,
+    [ImportId]         UNIQUEIDENTIFIER NULL,
+    [UNIQ_KEY]         CHAR (10)        NULL,
+    [PART_NO]          CHAR (25)        NULL,
+    [REVISION]         CHAR (10)        NULL,
+    [Description]      TEXT             CONSTRAINT [DF_RFQ_Description] DEFAULT ('') NULL,
+    [RequiredFileTags] NVARCHAR (200)   NULL,
+    [BOMSource]        NVARCHAR (10)    NULL,
+    [Status]           NVARCHAR (50)    NULL,
+    [LossReason]       NVARCHAR (200)   NULL,
+    [Source]           VARCHAR (200)    NULL,
+    CONSTRAINT [PK_RFQ] PRIMARY KEY CLUSTERED ([RFQId] ASC)
+);
+

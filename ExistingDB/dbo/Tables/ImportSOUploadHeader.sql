@@ -1,0 +1,11 @@
+﻿CREATE TABLE [dbo].[ImportSOUploadHeader] (
+    [ImportId]     UNIQUEIDENTIFIER NOT NULL,
+    [FileName]     NVARCHAR (500)   NOT NULL,
+    [Status]       NVARCHAR (50)    NULL,
+    [UploadDate]   SMALLDATETIME    NULL,
+    [UploadBy]     UNIQUEIDENTIFIER NULL,
+    [CompleteDate] SMALLDATETIME    CONSTRAINT [DF__ImportSOU__Compl__0F67DA59] DEFAULT (NULL) NULL,
+    [CompletedBy]  SMALLDATETIME    CONSTRAINT [DF__ImportSOU__Compl__105BFE92] DEFAULT (NULL) NULL,
+    CONSTRAINT [PK__ImportSO__869767EAD0C1E548] PRIMARY KEY CLUSTERED ([ImportId] ASC)
+);
+

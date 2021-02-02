@@ -1,0 +1,27 @@
+﻿CREATE TABLE [dbo].[wmUserGuideHistoryDocuments] (
+    [DocumentHistoryId] BIGINT           IDENTITY (1, 1) NOT NULL,
+    [DocumentId]        BIGINT           NULL,
+    [DocumentNumber]    VARCHAR (100)    NULL,
+    [DocumentRev]       VARCHAR (16)     NULL,
+    [Title]             VARCHAR (255)    NOT NULL,
+    [CreatedDate]       SMALLDATETIME    NULL,
+    [LastModifiedDate]  SMALLDATETIME    NULL,
+    [Author]            UNIQUEIDENTIFIER NULL,
+    [Approver]          UNIQUEIDENTIFIER NULL,
+    [ReleaseDate]       SMALLDATETIME    NULL,
+    [EditExplanation]   VARCHAR (MAX)    NULL,
+    [Content]           VARCHAR (MAX)    NULL,
+    [Summary]           VARCHAR (200)    NULL,
+    [Status]            VARCHAR (50)     NOT NULL,
+    [Template]          VARCHAR (100)    NULL,
+    [TemplateValues]    VARCHAR (MAX)    NULL,
+    [Display]           BIT              CONSTRAINT [DF_wmUserGuideHistoryDocuments_Display] DEFAULT ((0)) NOT NULL,
+    [ViewCount]         INT              CONSTRAINT [DF_wmUserGuideHistoryDocuments_ViewCount] DEFAULT ((0)) NOT NULL,
+    [InternalOnly]      BIT              CONSTRAINT [DF_wmUserGuideHistoryDocuments_InternalOnly] DEFAULT ((0)) NOT NULL,
+    [DocumentLevel]     INT              NOT NULL,
+    CONSTRAINT [PK_wmUserGuideHistoryDocuments_1] PRIMARY KEY CLUSTERED ([DocumentHistoryId] ASC),
+    CONSTRAINT [FK_wmUserGuideHistoryDocuments_aspnet_Profile] FOREIGN KEY ([Approver]) REFERENCES [dbo].[aspnet_Profile] ([UserId]),
+    CONSTRAINT [FK_wmUserGuideHistoryDocuments_aspnet_Profile1] FOREIGN KEY ([Author]) REFERENCES [dbo].[aspnet_Profile] ([UserId]),
+    CONSTRAINT [FK_wmUserGuideHistoryDocuments_wmUserGuideDocuments] FOREIGN KEY ([DocumentId]) REFERENCES [dbo].[wmUserGuideDocuments] ([DocumentId])
+);
+

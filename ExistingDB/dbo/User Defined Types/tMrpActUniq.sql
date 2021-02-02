@@ -1,0 +1,3 @@
+﻿CREATE TYPE [dbo].[tMrpActUniq] AS TABLE (
+    [UNIQMRPACT] CHAR (10) NULL);
+

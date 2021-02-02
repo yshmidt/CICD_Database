@@ -1,0 +1,12 @@
+﻿CREATE FUNCTION [dbo].[fn_Wono4Part] (@WonoTable Wono4Part READONLY)
+
+RETURNS TABLE 
+AS
+RETURN 
+(
+SELECT Wono
+	FROM WOENTRY
+	WHERE UNIQ_KEY IN 
+		(SELECT UNIQ_KEY
+			FROM @WonoTable)
+)

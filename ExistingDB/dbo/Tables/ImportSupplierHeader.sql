@@ -1,0 +1,10 @@
+﻿CREATE TABLE [dbo].[ImportSupplierHeader] (
+    [ImportId]      UNIQUEIDENTIFIER NOT NULL,
+    [WorkSheetName] VARCHAR (500)    NOT NULL,
+    [UploadDate]    SMALLDATETIME    NOT NULL,
+    [UploadBy]      UNIQUEIDENTIFIER NOT NULL,
+    [CompleteDate]  SMALLDATETIME    CONSTRAINT [DF__ImportSup__Compl__10C612E6] DEFAULT (NULL) NULL,
+    [CompletedBy]   UNIQUEIDENTIFIER CONSTRAINT [DF__ImportSup__Compl__11BA371F] DEFAULT (NULL) NULL,
+    CONSTRAINT [PK__ImportSu__869767EAA434F52D] PRIMARY KEY CLUSTERED ([ImportId] ASC)
+);
+

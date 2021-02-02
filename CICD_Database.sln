@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.1231
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "CICD_Database", "CICD_Database\CICD_Database.sqlproj", "{E65542B0-B264-47FB-B41F-2ED0071F31BF}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ExistingDB", "ExistingDB\ExistingDB.sqlproj", "{7A77081F-9881-4CD3-8E48-0DD53305C629}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,12 @@ Global
 		{E65542B0-B264-47FB-B41F-2ED0071F31BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E65542B0-B264-47FB-B41F-2ED0071F31BF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E65542B0-B264-47FB-B41F-2ED0071F31BF}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{7A77081F-9881-4CD3-8E48-0DD53305C629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A77081F-9881-4CD3-8E48-0DD53305C629}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A77081F-9881-4CD3-8E48-0DD53305C629}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{7A77081F-9881-4CD3-8E48-0DD53305C629}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A77081F-9881-4CD3-8E48-0DD53305C629}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A77081F-9881-4CD3-8E48-0DD53305C629}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

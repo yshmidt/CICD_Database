@@ -1,0 +1,5 @@
+﻿CREATE VIEW dbo.View_Wo4Qa
+AS
+SELECT w.WONO, w.CUSTNO, w.OPENCLOS, w.JobType
+FROM     dbo.QAINSP AS Q INNER JOIN
+                  dbo.WOENTRY AS w ON Q.WONO = w.WONO

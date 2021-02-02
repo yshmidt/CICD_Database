@@ -1,0 +1,11 @@
+﻿CREATE TABLE [dbo].[ImportBOMToKitHeader] (
+    [ImportId]     UNIQUEIDENTIFIER NOT NULL,
+    [FileName]     NVARCHAR (500)   NOT NULL,
+    [Status]       NVARCHAR (500)   NOT NULL,
+    [UploadDate]   SMALLDATETIME    NULL,
+    [UploadBy]     UNIQUEIDENTIFIER NULL,
+    [CompleteDate] SMALLDATETIME    CONSTRAINT [DF__ImportBOM__Compl__225AB33C] DEFAULT (NULL) NULL,
+    [CompletedBy]  SMALLDATETIME    CONSTRAINT [DF__ImportBOM__Compl__234ED775] DEFAULT (NULL) NULL,
+    CONSTRAINT [PK__ImportBO__869767EABC0C8604] PRIMARY KEY CLUSTERED ([ImportId] ASC)
+);
+

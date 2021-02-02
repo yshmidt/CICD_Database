@@ -1,0 +1,53 @@
+﻿CREATE TABLE [dbo].[ACTIVITY] (
+    [ACTIV_ID]   CHAR (4)       CONSTRAINT [DF__ACTIVITY__ACTIV___3D5E1FD2] DEFAULT ('') NOT NULL,
+    [ACTIV_NAME] CHAR (25)      CONSTRAINT [DF__ACTIVITY__ACTIV___3E52440B] DEFAULT ('') NOT NULL,
+    [NUMBER]     NUMERIC (4)    CONSTRAINT [DF__ACTIVITY__NUMBER__3F466844] DEFAULT ((0)) NOT NULL,
+    [STD_INSTR]  TEXT           CONSTRAINT [DF__ACTIVITY__STD_IN__403A8C7D] DEFAULT ('') NOT NULL,
+    [MERGE]      BIT            CONSTRAINT [DF__ACTIVITY__MERGE__412EB0B6] DEFAULT ((0)) NOT NULL,
+    [INSTR_PICT] CHAR (200)     CONSTRAINT [DF__ACTIVITY__INSTR___4222D4EF] DEFAULT ('') NOT NULL,
+    [CAPTOTAL]   BIT            CONSTRAINT [DF__ACTIVITY__CAPTOT__4316F928] DEFAULT ((0)) NOT NULL,
+    [STD_RATE]   NUMERIC (8, 2) CONSTRAINT [DF__ACTIVITY__STD_RA__440B1D61] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [ACTIVITY_PK] PRIMARY KEY CLUSTERED ([ACTIV_ID] ASC)
+);
+
+
+GO
+CREATE NONCLUSTERED INDEX [NUMBER]
+    ON [dbo].[ACTIVITY]([NUMBER] ASC);
+
+
+GO
+
+-- =============================================
+
+-- Author:		Yelena Shmidt
+
+-- Create date: 08/20/2009
+
+-- Description:	After Delete trigger for the Depts table
+
+-- =============================================
+
+CREATE TRIGGER  [dbo].[Activity_Delete]
+
+   ON  [dbo].[ACTIVITY] 
+
+   AFTER DELETE
+
+AS 
+
+BEGIN
+
+	-- SET NOCOUNT ON added to prevent extra result sets from
+
+	-- interfering with SELECT statements.
+
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION 
+	DELETE FROM ActCost WHERE Activ_id IN (SELECT Activ_id FROM DELETED)
+	DELETE FROM ActSetTp WHERE Activ_id IN (SELECT Activ_id FROM DELETED)
+	DELETE FROM ActPkg WHERE Activ_id IN (SELECT Activ_id FROM DELETED)
+	COMMIT
+END
+

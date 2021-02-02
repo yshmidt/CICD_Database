@@ -1,0 +1,8 @@
+﻿CREATE TABLE [dbo].[RFQNREs] (
+    [NREId]  BIGINT          IDENTITY (1, 1) NOT NULL,
+    [RFQId]  BIGINT          NULL,
+    [Item]   NVARCHAR (50)   NULL,
+    [Charge] NUMERIC (18, 2) NULL,
+    CONSTRAINT [PK_RFQNREs] PRIMARY KEY CLUSTERED ([NREId] ASC)
+);
+

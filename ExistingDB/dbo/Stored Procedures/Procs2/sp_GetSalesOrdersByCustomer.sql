@@ -1,0 +1,44 @@
+﻿-- Author:		Sachin Shevale
+-- Create date: 03/17/2016
+-- Description:	Get list of all Sales Order Based on Customer
+---Used for get sales order numbers by customer number
+--[dbo].[sp_GetSalesOrdersByCustomer] null
+--05-10-2015 Sachin s- remove If condition on 
+CREATE PROCEDURE [dbo].[sp_GetSalesOrdersByCustomer] 
+    @custno char(10) = null
+AS
+BEGIN
+--IF (@CUSTNO IS NOT NULL)
+SELECT DISTINCT 
+--Trim the zero's
+	--SUBSTRING(SOMAIN.CUSTNO, PATINDEX('%[^0 ]%', SOMAIN.CUSTNO+ ' '), LEN(SOMAIN.CUSTNO)) AS CUSTNO,
+	dbo.fRemoveLeadingZeros(SOMAIN.CUSTNO) AS CUSTNO,
+	  --Trim the zero's
+	--SUBSTRING(SOMAIN.SONO, PATINDEX('%[^0 ]%', SOMAIN.SONO + ' '), LEN(SOMAIN.SONO)) AS SONO
+	dbo.fRemoveLeadingZeros(SOMAIN.SONO) AS SONO
+
+ from SOMAIN
+	INNER JOIN  SODETAIL ON SOMAIN.SONO=SODETAIL.SONO
+	INNER JOIN  CUSTOMER ON SOMAIN.CUSTNO=CUSTOMER.CUSTNO
+WHERE
+	SOMAIN.ORD_TYPE = 'Open'
+	AND SOMAIN.POACK = 1
+	AND SOMAIN.IS_RMA = 0 
+	AND SODETAIL.ORD_QTY > 0 
+	AND CUSTOMER.STATUS = 'Active'
+	AND CUSTOMER.CREDITOK = 'OK'
+	--AND CUSTOMER.CUSTNO=@CUSTNO
+	AND ( @custno is null or CUSTOMER.CUSTNO=@custno)
+	--ELSE
+	--SELECT DISTINCT SOMAIN.CUSTNO ,SOMAIN.SONO  from SOMAIN
+	--INNER JOIN  SODETAIL ON SOMAIN.SONO=SODETAIL.SONO
+	--INNER JOIN  CUSTOMER ON SOMAIN.CUSTNO=CUSTOMER.CUSTNO
+	--WHERE
+	--SOMAIN.ORD_TYPE = 'Open'
+	--AND SOMAIN.POACK = 1
+	--AND SOMAIN.IS_RMA = 0 
+	--AND SODETAIL.ORD_QTY > 0 
+	--AND CUSTOMER.STATUS = 'Active'
+	--AND CUSTOMER.CREDITOK = 'OK'
+	
+END

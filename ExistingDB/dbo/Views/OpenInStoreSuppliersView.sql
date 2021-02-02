@@ -1,0 +1,9 @@
+﻿CREATE VIEW dbo.OpenInStoreSuppliersView
+AS
+SELECT DISTINCT 
+                      TOP (100) PERCENT dbo.SUPINFO.SUPNAME, dbo.SUPINFO.SUPID, dbo.SUPINFO.STATUS, dbo.SUPINFO.R_LINK, dbo.SUPINFO.C_LINK, 
+                      dbo.POSTORE.UNIQSUPNO
+FROM         dbo.SUPINFO INNER JOIN
+                      dbo.POSTORE ON dbo.SUPINFO.UNIQSUPNO = dbo.POSTORE.UNIQSUPNO
+WHERE     (dbo.POSTORE.PONUM = ' ')
+ORDER BY dbo.SUPINFO.SUPNAME

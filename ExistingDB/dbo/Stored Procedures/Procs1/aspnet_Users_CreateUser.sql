@@ -1,0 +1,24 @@
+﻿-- Batch submitted through debugger: 160.7.241.22@SQLEXPRESS,1500.MANEX.sql|1448|0|C:\Development\Manex2Sql\SqlStoredProcFunction\ApexSqlScript\ManexNewSecurityTablesAndSP\160.7.241.22@SQLEXPRESS,1500.MANEX.sql
+
+CREATE PROCEDURE [dbo].aspnet_Users_CreateUser
+    @ApplicationId    uniqueidentifier,
+    @UserName         nvarchar(256),
+    @IsUserAnonymous  bit,
+    @LastActivityDate DATETIME,
+    @UserId           uniqueidentifier OUTPUT
+AS
+BEGIN
+    IF( @UserId IS NULL )
+        SELECT @UserId = NEWID()
+    ELSE
+    BEGIN
+        IF( EXISTS( SELECT UserId FROM dbo.aspnet_Users
+                    WHERE @UserId = UserId ) )
+            RETURN -1
+    END
+
+    INSERT dbo.aspnet_Users (ApplicationId, UserId, UserName, LoweredUserName, IsAnonymous, LastActivityDate)
+    VALUES (@ApplicationId, @UserId, @UserName, LOWER(@UserName), @IsUserAnonymous, @LastActivityDate)
+
+    RETURN 0
+END

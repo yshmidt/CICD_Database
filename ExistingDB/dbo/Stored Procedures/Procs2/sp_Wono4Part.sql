@@ -1,0 +1,14 @@
+﻿
+CREATE PROC [dbo].[sp_Wono4Part] @WonoTable Wono4Part READONLY
+
+AS
+
+SELECT Wono
+
+FROM WOENTRY
+
+WHERE UNIQ_KEY IN
+
+(SELECT UNIQ_KEY
+
+FROM @WonoTable)

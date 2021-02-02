@@ -1,0 +1,5 @@
+﻿CREATE PROC [dbo].[timeLogTypeView]
+AS
+SELECT *
+	FROM TMLOGTP
+	ORDER BY Number

@@ -1,0 +1,79 @@
+﻿
+-- =============================================
+-- Author:		Shivshankar P
+-- Create date: <10/26/2017>
+-- Description:	<Compiles the Material Receipt History Report for One Part>
+--[GetMatlRecptHistPnWM] @lcUniq_key='_26V0MTTWO',@lcDateStart = '2017-07-20 03:19:00' ,@lcDateEnd ='2017-10-26 03:19:00',@userId='49F80792-E15E-4B62-B720-21B360E3108A'
+-- =============================================
+CREATE PROCEDURE [dbo].[GetMatlRecptHistPnWM]
+--declare
+	   	 @lcUniq_key char(10) = ''
+		,@lcSupLeadZero as char(3) = ''
+		,@lcDateStart as smalldatetime= null
+		,@lcDateEnd as smalldatetime = null
+		,@userId uniqueidentifier= NULL
+	    ,@startRecord int =1
+        ,@endRecord int =150
+
+AS
+begin 
+
+IF dbo.fn_IsFCInstalled() = 0
+	BEGIN
+
+	SELECT	DBO.fRemoveLeadingZeros(POMAIN.PONUM) AS PONUM,PORECDTL.PORECPKNO,PORECDTL.RECEIVERNO,RECVDATE,ReceivedQty  AS RECVQTY,PORECDTL.FailedQty,SUPNAME
+	FROM	POMAIN
+			INNER JOIN SUPINFO ON POMAIN.UNIQSUPNO = SUPINFO.UNIQSUPNO
+			INNER JOIN POITEMS ON POMAIN.PONUM = POITEMS.PONUM
+			LEFT OUTER JOIN INVENTOR ON POITEMS.UNIQ_KEY = INVENTOR.UNIQ_KEY
+			inner join PORECDTL on poitems.UNIQLNNO = PORECDTL.UNIQLNNO
+			inner JOIN PORECLOC ON PORECDTL.UNIQRECDTL = PORECLOC.FK_UNIQRECDTL
+			LEFT OUTER JOIN POITSCHD ON PORECLOC.UNIQDETNO = POITSCHD.UNIQDETNO
+			left outer join WAREHOUS on PORECLOC.UNIQWH = warehous.UNIQWH
+			LEFT OUTER JOIN PORECLOT L ON Porecloc.LOC_UNIQ =l.LOC_UNIQ  
+			LEFT OUTER JOIN PORECSER S ON PorecLoc.LOC_UNIQ =S.LOC_UNIQ AND ISNULL(l.Lot_uniq,CAST(' ' as CHAR(10))) =S.LOT_UNIQ 
+
+	WHERE	RECVDATE>=@lcdatestart and RECVDATE<@lcdateend+1
+			and inventor.UNIQ_KEY = @lcUniq_key   
+			GROUP BY  POMAIN.PONUM,PORECDTL.PORECPKNO,PORECDTL.RECEIVERNO,RECVDATE,ReceivedQty,PORECDTL.FailedQty,CONUM,SUPNAME 
+			Order by  RECVDATE DESC
+			  OFFSET (@StartRecord -1) ROWS  
+					 FETCH NEXT @EndRecord ROWS ONLY;  
+
+	END
+ELSE
+	BEGIN
+	
+	SELECT DBO.fRemoveLeadingZeros(POMAIN.PONUM) AS PONUM,PORECDTL.PORECPKNO,PORECDTL.RECEIVERNO,RECVDATE,ReceivedQty  AS RECVQTY,PORECDTL.FailedQty,SUPNAME
+
+	FROM	POMAIN
+			LEFT JOIN Fcused PF ON POMAIN.PrFcused_uniq = PF.Fcused_uniq
+			LEFT JOIN Fcused FF ON POMAIN.FuncFcused_uniq = FF.Fcused_uniq			
+			LEFT JOIN Fcused TF ON POMAIN.Fcused_uniq = TF.Fcused_uniq	
+			INNER JOIN SUPINFO ON POMAIN.UNIQSUPNO = SUPINFO.UNIQSUPNO
+			INNER JOIN POITEMS ON POMAIN.PONUM = POITEMS.PONUM
+			LEFT OUTER JOIN INVENTOR ON POITEMS.UNIQ_KEY = INVENTOR.UNIQ_KEY
+			inner join PORECDTL on poitems.UNIQLNNO = PORECDTL.UNIQLNNO
+			inner JOIN PORECLOC ON PORECDTL.UNIQRECDTL = PORECLOC.FK_UNIQRECDTL
+			LEFT OUTER JOIN POITSCHD ON PORECLOC.UNIQDETNO = POITSCHD.UNIQDETNO
+			left outer join WAREHOUS on PORECLOC.UNIQWH = warehous.UNIQWH
+			LEFT OUTER JOIN PORECLOT L ON Porecloc.LOC_UNIQ =l.LOC_UNIQ  
+			LEFT OUTER JOIN PORECSER S ON PorecLoc.LOC_UNIQ =S.LOC_UNIQ AND ISNULL(l.Lot_uniq,CAST(' ' as CHAR(10))) =S.LOT_UNIQ 
+		
+	WHERE	RECVDATE>=@lcdatestart and RECVDATE<@lcdateend+1
+			and 
+			inventor.UNIQ_KEY = @lcUniq_key 
+			GROUP BY  POMAIN.PONUM,PORECDTL.PORECPKNO,PORECDTL.RECEIVERNO,RECVDATE,ReceivedQty,PORECDTL.FailedQty,CONUM,SUPNAME 
+			Order by RECVDATE DESC
+			  OFFSET (@StartRecord -1) ROWS  
+					 FETCH NEXT @EndRecord ROWS ONLY;  
+			
+	END
+end
+
+
+
+
+		
+
+		

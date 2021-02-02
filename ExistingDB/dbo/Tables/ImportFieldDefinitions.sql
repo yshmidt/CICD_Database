@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[ImportFieldDefinitions] (
+    [FieldDefId]      UNIQUEIDENTIFIER CONSTRAINT [DF_importFieldDefinitions_fieldDefId] DEFAULT (newsequentialid()) NOT NULL,
+    [ModuleId]        INT              NULL,
+    [SheetNo]         INT              NULL,
+    [FieldName]       VARCHAR (50)     CONSTRAINT [DF_importFieldDefinitions_fieldName] DEFAULT ('') NOT NULL,
+    [ValueSP]         VARCHAR (50)     CONSTRAINT [DF_importFieldDefinitions_valueSP] DEFAULT ('') NOT NULL,
+    [ValidationSP]    VARCHAR (50)     CONSTRAINT [DF_importFieldDefinitions_validationSP] DEFAULT ('') NOT NULL,
+    [SpParameters]    VARCHAR (50)     CONSTRAINT [DF_importFieldDefinitions_spParameters] DEFAULT ('') NOT NULL,
+    [DataType]        VARCHAR (10)     CONSTRAINT [DF_importFieldDefinitions_dataType] DEFAULT ('string') NOT NULL,
+    [Required]        BIT              CONSTRAINT [DF_importFieldDefinitions_required] DEFAULT ((0)) NOT NULL,
+    [FixMatches]      BIT              CONSTRAINT [DF_importFieldDefinitions_fixMatches] DEFAULT ((0)) NOT NULL,
+    [ExistLock]       BIT              CONSTRAINT [DF_importFieldDefinitions_ExistLock] DEFAULT ((0)) NOT NULL,
+    [Validated]       BIT              CONSTRAINT [DF_importFieldDefinitions_validated] DEFAULT ((1)) NOT NULL,
+    [Table]           VARCHAR (50)     CONSTRAINT [DF_importFieldDefinitions_table] DEFAULT ('') NOT NULL,
+    [Hide]            BIT              CONSTRAINT [DF_importFieldDefinitions_hide] DEFAULT ((0)) NULL,
+    [Default]         VARCHAR (50)     CONSTRAINT [DF_importFieldDefinitions_default] DEFAULT ('') NOT NULL,
+    [ValueSQL]        VARCHAR (200)    CONSTRAINT [DF_importFieldDefinitions_valueSQL] DEFAULT ('') NOT NULL,
+    [ErrMsg]          VARCHAR (200)    CONSTRAINT [DF_importFieldDefinitions_errMsg] DEFAULT ('') NOT NULL,
+    [SourceTableName] VARCHAR (50)     CONSTRAINT [DF_importFieldDefinitions_sourceTableName] DEFAULT ('') NOT NULL,
+    [SourceFieldName] VARCHAR (50)     CONSTRAINT [DF_importFieldDefinitions_sourceFieldName] DEFAULT ('') NOT NULL,
+    [FieldLength]     INT              NULL,
+    [ColumnOrder]     INT              NULL,
+    [UploadType]      NVARCHAR (50)    CONSTRAINT [DF__ImportFie__Uploa__737FC8C2] DEFAULT ('') NOT NULL,
+    CONSTRAINT [PK_importFieldDefinitions] PRIMARY KEY CLUSTERED ([FieldDefId] ASC)
+);
+

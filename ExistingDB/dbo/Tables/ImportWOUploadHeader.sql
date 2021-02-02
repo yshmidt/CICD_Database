@@ -1,0 +1,11 @@
+﻿CREATE TABLE [dbo].[ImportWOUploadHeader] (
+    [ImportId]   UNIQUEIDENTIFIER CONSTRAINT [DF__ImportWOU__Impor__08CFEB63] DEFAULT (newid()) NOT NULL,
+    [UserId]     UNIQUEIDENTIFIER NOT NULL,
+    [ImportDt]   SMALLDATETIME    CONSTRAINT [DF__ImportWOU__Impor__09C40F9C] DEFAULT (getdate()) NULL,
+    [FileName]   NVARCHAR (100)   NOT NULL,
+    [CompleteBy] NVARCHAR (100)   NULL,
+    [CompleteDt] SMALLDATETIME    CONSTRAINT [DF__ImportWOU__Compl__0AB833D5] DEFAULT ('') NULL,
+    [Status]     VARCHAR (50)     CONSTRAINT [DF__ImportWOU__Statu__0BAC580E] DEFAULT ('started') NOT NULL,
+    CONSTRAINT [PK__ImportWO__869767EA375158CF] PRIMARY KEY CLUSTERED ([ImportId] ASC)
+);
+

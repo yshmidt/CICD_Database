@@ -1,0 +1,68 @@
+﻿CREATE TABLE [dbo].[PUR_VAR] (
+    [TRANS_DATE]      SMALLDATETIME   NULL,
+    [TRANS_DT]        SMALLDATETIME   NULL,
+    [ACPT_QTY]        NUMERIC (12, 2) CONSTRAINT [DF__PUR_VAR__ACPT_QT__27AFA12C] DEFAULT ((0)) NOT NULL,
+    [COSTEACH]        NUMERIC (13, 5) CONSTRAINT [DF__PUR_VAR__COSTEAC__2997E99E] DEFAULT ((0)) NOT NULL,
+    [STDCOST]         NUMERIC (13, 5) CONSTRAINT [DF__PUR_VAR__STDCOST__2B803210] DEFAULT ((0)) NOT NULL,
+    [VARIANCE]        NUMERIC (13, 2) CONSTRAINT [DF__PUR_VAR__VARIANC__2D687A82] DEFAULT ((0)) NOT NULL,
+    [GL_NBR]          CHAR (13)       CONSTRAINT [DF__PUR_VAR__GL_NBR__2F50C2F4] DEFAULT ('') NOT NULL,
+    [GL_NBR_VAR]      CHAR (13)       CONSTRAINT [DF__PUR_VAR__GL_NBR___3044E72D] DEFAULT ('') NOT NULL,
+    [VAR_KEY]         CHAR (10)       CONSTRAINT [DF__PUR_VAR__VAR_KEY__322D2F9F] DEFAULT ('') NOT NULL,
+    [IS_REL_GL]       BIT             CONSTRAINT [DF__PUR_VAR__IS_REL___332153D8] DEFAULT ((0)) NOT NULL,
+    [SDET_UNIQ]       CHAR (10)       CONSTRAINT [DF__PUR_VAR__SDET_UN__37E608F5] DEFAULT ('') NOT NULL,
+    [fk_UniqApHead]   CHAR (10)       CONSTRAINT [DF_PUR_VAR_fk_UniqApHead] DEFAULT ('') NOT NULL,
+    [STDCOSTPR]       NUMERIC (13, 5) CONSTRAINT [DF__PUR_VAR__STDCOST__2C227DEA] DEFAULT ((0)) NOT NULL,
+    [COSTEACHPR]      NUMERIC (13, 5) CONSTRAINT [DF__PUR_VAR__COSTEAC__31A64D16] DEFAULT ((0)) NOT NULL,
+    [VARIANCEPR]      NUMERIC (13, 2) CONSTRAINT [DF__PUR_VAR__VARIANC__329A714F] DEFAULT ((0)) NOT NULL,
+    [PRFCUSED_UNIQ]   CHAR (10)       CONSTRAINT [DF__PUR_VAR__PRFCUSE__344DAF97] DEFAULT ('') NOT NULL,
+    [FUNCFCUSED_UNIQ] CHAR (10)       CONSTRAINT [DF__PUR_VAR__FUNCFCU__3541D3D0] DEFAULT ('') NOT NULL,
+    CONSTRAINT [PUR_VAR_PK] PRIMARY KEY CLUSTERED ([VAR_KEY] ASC)
+);
+
+
+GO
+CREATE NONCLUSTERED INDEX [IS_REL_GL_VAR]
+    ON [dbo].[PUR_VAR]([IS_REL_GL] ASC, [VARIANCE] ASC)
+    INCLUDE([TRANS_DT], [GL_NBR_VAR], [VAR_KEY], [SDET_UNIQ]);
+
+
+GO
+CREATE NONCLUSTERED INDEX [SDET_UNIQ]
+    ON [dbo].[PUR_VAR]([SDET_UNIQ] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [trans_date]
+    ON [dbo].[PUR_VAR]([TRANS_DATE] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [UNIQAPHEAD]
+    ON [dbo].[PUR_VAR]([fk_UniqApHead] ASC);
+
+
+GO
+-- =============================================
+-- Author:		Yelena Shmidt
+-- Create date: 06/29/2012
+-- Description:	update is_rel_gl for records with Variance=0.00
+-- Modification:
+-- 04/18/17 VL added to update functional currency fields
+-- =============================================
+CREATE TRIGGER [dbo].[Pur_var_insert]
+   ON  [dbo].[PUR_VAR]
+   AFTER INSERT
+AS 
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	BEGIN TRANSACTION
+	UPDATE PUR_VAR SET IS_REL_GL = CASE WHEN I.VARIANCE =0.00 THEN 1 ELSE Pur_Var.IS_REL_GL END ,
+						PRFcused_uniq = CASE WHEN dbo.fn_IsFCInstalled() = 0 THEN SPACE(10) ELSE dbo.fn_GetPresentationCurrency() END,
+						FuncFcused_uniq = CASE WHEN dbo.fn_IsFCInstalled() = 0 THEN SPACE(10) ELSE dbo.fn_GetFunctionalCurrency() END	
+	FROM inserted I WHERE I.VAR_KEY=PUR_VAR.VAR_KEY  
+	COMMIT
+    -- Insert statements for trigger here
+
+END
