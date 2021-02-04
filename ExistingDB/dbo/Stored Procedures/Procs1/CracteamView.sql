@@ -5,5 +5,5 @@ BEGIN
 		FROM CRACTEAM, Users
 		WHERE Cracteam.CRMEMBER = Users.USERID
 		AND TMCARNO = @lcCarno
-		ORDER BY Name, Firstname
+		ORDER BY Name, users.FIRSTNAME
 END
