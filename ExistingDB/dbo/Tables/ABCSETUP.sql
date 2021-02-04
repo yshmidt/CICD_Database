@@ -4,7 +4,7 @@
     [abcbase]            NUMERIC (1)   CONSTRAINT [DF_ABCSETUP_ABCBASE] DEFAULT ((0)) NOT NULL,
     [eaufactor]          NUMERIC (3)   CONSTRAINT [DF_ABCSETUP_eaufactor] DEFAULT ((0)) NOT NULL,
     [LASTEAU]            SMALLDATETIME NULL,
-    [notinstore]         BIT           CONSTRAINT [DF_ABCSETUP_notinstore] DEFAULT ((0)) NULL,
+    [notinstore]         BIT           CONSTRAINT [DF_ABCSETUP_notinstore] DEFAULT ((0)) NOT NULL,
     [IsSynchronizedFlag] BIT           CONSTRAINT [DF__ABCSETUP__IsSync__36002288] DEFAULT ((0)) NULL,
     CONSTRAINT [ABCSETUP_PK] PRIMARY KEY CLUSTERED ([UNIQABC] ASC)
 );
